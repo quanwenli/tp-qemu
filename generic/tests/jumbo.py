@@ -1,7 +1,9 @@
 import logging
 import random
 
+from avocado.core import exceptions
 from avocado.utils import process
+
 from virttest import utils_misc
 from virttest import utils_test
 from virttest import utils_net
@@ -69,8 +71,12 @@ def run(test, params, env):
     error_context.context("Change all Bridge NICs MTU to %s" %
                           mtu, logging.info)
     for iface in target_ifaces:
-        process.run(host_mtu_cmd % (iface, mtu), shell=True)
-
+        try:
+            process.system_output(host_mtu_cmd % (iface, mtu), shell=True)
+        except process.CmdError as err:
+            if "SIOCSIFMTU" in err.result.stderr:
+                raise exceptions.TestSkipError(
+                         "The ethenet does not support jumbo, skip test")
     try:
         error_context.context("Changing the MTU of guest", logging.info)
         # Environment preparation
