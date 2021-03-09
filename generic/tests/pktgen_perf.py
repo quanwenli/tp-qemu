@@ -109,7 +109,7 @@ def run(test, params, env):
         output_cmd(cmd_install)
         output_cmd(cmd_clean)
 
-    check_cmd = "uname -r |grep el8"
+    check_cmd = 'uname -r |grep -E "el8|el9"'
     if process.run(check_cmd, shell=True):
         install_package(host_ver)
     if session.cmd(check_cmd):
